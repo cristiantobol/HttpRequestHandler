@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "HttpRequestHandler": {
+      "commandName": "Project"
+    }
+  }
+}
