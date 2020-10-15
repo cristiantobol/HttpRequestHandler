@@ -8,15 +8,20 @@ using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 using System.Xml.Serialization;
 using System.IO;
+using HttpRequestHandler.Utils;
 
 namespace HttpRequestHandler.Opera
 {
-    public class OperaInvoiceBody : OperaInvoiceDetails
+    public class OperaInvoiceBody
     {
+        public string GrossAccommodation = "";
+        public string CityTaxPrice = "";
         public List<PositiveCharge> ReadXML(string[] args)
         {
             //String URLString = "http://localhost:81/xml/fp_buhhanota11324.xml";
             String URLString = args[0];
+            var configIni = new IniFile("config.ini");
+            string accommodation = configIni.Read("ACCOMMODATION");
 
             List<PositiveCharge> positiveChargeList = new List<PositiveCharge>();
             XmlDocument xmldoc = new XmlDocument();
@@ -31,18 +36,39 @@ namespace HttpRequestHandler.Opera
                 positiveCharge.Code = node["CODE"].InnerText;
                 positiveCharge.Description = node["DESCRIPTION"].InnerText;
                 positiveCharge.Quantity = node["QUANTITY"].InnerText;
-                positiveCharge.Price = node["GROSSAMOUNT"].InnerText;
+                positiveCharge.FiscalTrxCodeType = node["FISCALTRXCODETYPE"].InnerText;
+                positiveCharge.Type = node["TYPE"].InnerText;
+                positiveCharge.TotalInclTaxAmount = node["TOTALINCLTAXAMOUNT"].InnerText;
+                positiveCharge.Tax6Amount = node["TAX6AMOUNT"].InnerText;
+                positiveCharge.CodeType = node["CODETYPE"].InnerText;
+                positiveCharge.TaxCodeNo = node["TAX_CODE_NO"].InnerText;
+                positiveCharge.GrossAmount = node["GROSSAMOUNT"].InnerText;
 
-                if((node["CODE"].InnerText == "7500" && node["TAX2AMOUNT"].InnerText.Length > 0) || node["CODE"].InnerText == "7101")
+                positiveCharge.isTaxIncuded = false;
+
+                if((positiveCharge.TaxCodeNo == "02,06" || positiveCharge.TaxCodeNo == "02,05") && positiveCharge.TotalInclTaxAmount != "")
                 {
-                    positiveCharge.TaxAmount = "B";
+                    positiveCharge.FiscalTrxCodeType = "B";
+                    positiveCharge.isTaxIncuded = true;
+                    GrossAccommodation = (decimal.Parse(positiveCharge.GrossAmount) - decimal.Parse(positiveCharge.Tax6Amount)).ToString();
+                    CityTaxPrice = (decimal.Parse(positiveCharge.Tax6Amount)).ToString();
                 }
-                else if(node["CODE"].InnerText == "7105")
+
+                if(positiveCharge.TotalInclTaxAmount == "" || positiveCharge.TotalInclTaxAmount == "0.00")
                 {
-                    positiveCharge.TaxAmount = "D";
+                    positiveCharge.FiscalTrxCodeType = "B";
+                }
+
+                if(positiveCharge.Description == "VAT B")
+                {
+                    positiveCharge.Quantity = "1";
+                }
+
+                if (positiveCharge.FiscalTrxCodeType == "_")
+                {
+                    positiveCharge.FiscalTrxCodeType = "E";
                 }
                 
-                positiveCharge.FiscalTrxCodeType = node["FISCALTRXCODETYPE"].InnerText;
                 positiveChargeList.Add(positiveCharge);
             }
             return positiveChargeList;
