@@ -56,7 +56,14 @@ namespace HttpRequestHandler.Opera
 
                 if(positiveCharge.TotalInclTaxAmount == "" || positiveCharge.TotalInclTaxAmount == "0.00")
                 {
-                    positiveCharge.FiscalTrxCodeType = "B";
+                    if(positiveCharge.FiscalTrxCodeType == "_")
+                    {
+                        positiveCharge.FiscalTrxCodeType = "E";
+                    }
+                    else
+                    {
+                        positiveCharge.FiscalTrxCodeType = "B";
+                    }             
                 }
 
                 if(positiveCharge.Description == "VAT B")
