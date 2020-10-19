@@ -127,21 +127,29 @@ namespace HttpRequestHandler.Tremol
             decimal cashGrouped = 0;
             bool hasCash = false;
             bool hasCardPayment = false;
+            bool hasCheck = false;
+            bool hasVirament = false;
 
             XmlNodeList paymentNodes = xmldoc.SelectNodes("folio/body/payment");
 
             foreach (XmlNode item in paymentNodes)
             {
-                if(item["FISCALTRXCODETYPE"].InnerText == "A")
+                if (item["FISCALTRXCODETYPE"].InnerText == "A")
                 {
                     hasCardPayment = true;
-                    cardGrouped += decimal.Parse(item["POSTEDAMOUNT"].InnerText);                  
+                    cardGrouped += decimal.Parse(item["POSTEDAMOUNT"].InnerText);
                 }
                 else if (item["FISCALTRXCODETYPE"].InnerText == "C")
                 {
                     hasCash = true;
                     cashGrouped += decimal.Parse(item["POSTEDAMOUNT"].InnerText);
                 }
+                else if (item["FISCALTRXCODETYPE"].InnerText == "E")
+                    hasCheck = true;
+                else if (item["FISCALTRXCODETYPE"].InnerText == "X")
+                    hasVirament = true;
+                else
+                    item["FISCALTRXCODETYPE"].InnerText = "C";
             }
 
             if (hasCardPayment)
