@@ -29,8 +29,11 @@ namespace HttpRequestHandler.Opera
 
             PositiveCharge positiveCharge;
             XmlNodeList positiveChargeNodes = xmldoc.SelectNodes("folio/body/positive_charge");
+            XmlNodeList negativeChargeNodes = xmldoc.SelectNodes("folio/body/negative_charge");
 
-            foreach (XmlNode node in positiveChargeNodes)
+            var concatList = positiveChargeNodes.Cast<XmlNode>().Concat<XmlNode>(negativeChargeNodes.Cast<XmlNode>());
+
+            foreach (XmlNode node in concatList)
             {
                 positiveCharge = new PositiveCharge();
                 positiveCharge.Code = node["CODE"].InnerText;

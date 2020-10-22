@@ -39,12 +39,12 @@ namespace HttpRequestHandler
             StringBuilder builder = new StringBuilder(parameters);
             builder.Replace("@in_mesg_status=!null!", "@in_mesg_status=!SUCCESS!");
 
-            using (WebClient wc = new WebClient())
-            {
-                wc.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                string HtmlResult = wc.UploadString(URI3, builder.ToString());
-                Console.WriteLine(HtmlResult);
-            }
+            //using (WebClient wc = new WebClient())
+            //{
+            //    wc.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+            //    string HtmlResult = wc.UploadString(URI3, builder.ToString());
+            //    Console.WriteLine(HtmlResult);
+            //}
 
             data.Close();
             reader.Close();
