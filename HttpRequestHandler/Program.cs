@@ -1,5 +1,6 @@
 ﻿using HttpRequestHandler.Opera;
 using HttpRequestHandler.Tremol;
+using HttpRequestHandler.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,7 +22,7 @@ namespace HttpRequestHandler
             if (args == null || args.Length == 0)
             {
                 throw new ApplicationException("Specify the URI of the resource to retrieve.");
-            }
+            }           
 
             TremolXmlBuilder tremolXml = new TremolXmlBuilder();
             tremolXml.BuildTremolXml(args);
@@ -33,22 +34,20 @@ namespace HttpRequestHandler
             Stream data = client.OpenRead(args[0]);
             StreamReader reader = new StreamReader(data);
 
-
             string URI3 = args[2];
             string parameters = args[1];
             StringBuilder builder = new StringBuilder(parameters);
-            builder.Replace("@in_mesg_status=!null!", "@in_mesg_status=!SUCCESS!");    
-            
-            using (WebClient wc = new WebClient())
-            {
-                wc.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                string HtmlResult = wc.UploadString(URI3, builder.ToString());
-                Console.WriteLine(HtmlResult);
-            }
+            builder.Replace("@in_mesg_status=!null!", "@in_mesg_status=!SUCCESS!");
+
+            //using (WebClient wc = new WebClient())
+            //{
+            //    wc.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+            //    string HtmlResult = wc.UploadString(URI3, builder.ToString());
+            //    Console.WriteLine(HtmlResult);
+            //}
 
             data.Close();
             reader.Close();
-            //Console.ReadKey();
         }
     }
 }

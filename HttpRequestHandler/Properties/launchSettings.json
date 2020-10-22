@@ -1,7 +1,8 @@
 {
   "profiles": {
     "HttpRequestHandler": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "http://localhost/Xml/multecitytaxuri.xml in_url=in_sid=!FOLIO_GEN_156766726998082_3614048!@in_resort=!BUHHA!@in_mesg_code=!FOLIO!@in_mesg_status=!null!@in_mesg_text=!null!@in_fiscal_bill_no=!null!@in_queue_name=!FOLIO!&jndiname=operaoperads https://w2012server/Operajserv/operapublicservlets/FiscalPrintingServlet"
     }
   }
 }
