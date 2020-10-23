@@ -6,8 +6,8 @@ namespace HttpRequestHandler.Opera.Models
 {
     public class Payment
     {
-        public string Code { get; set; }
-        public string Description { get; set; }
-        public string TaxInclusiveYN { get; set; }
+        public string FiscalTrxCodeType { get; set; }
+        public string PostedAmount { get; set; }
+        public string MyProperty { get; set; }
     }
 }

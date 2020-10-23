@@ -58,7 +58,7 @@ namespace HttpRequestHandler.Tremol
             billNumberArgs.AppendChild(textArgEl);
 
             OperaInvoiceBody operaInvoiceBody = new OperaInvoiceBody();
-            var positiveChargesList = operaInvoiceBody.ReadXML(args); 
+            var positiveChargesList = operaInvoiceBody.ReadOperaXmlCharges(args); 
 
             foreach (var positiveCharge in positiveChargesList)
             {
@@ -81,7 +81,7 @@ namespace HttpRequestHandler.Tremol
 
                 XmlElement priceArgEl = doc.CreateElement(string.Empty, "Arg", string.Empty);
                 priceArgEl.SetAttribute("Name", "Price");
-                priceArgEl.SetAttribute("Value", positiveCharge.isTaxIncuded ? operaInvoiceBody.GrossAccommodation : positiveCharge.GrossAmount);
+                priceArgEl.SetAttribute("Value", positiveCharge.IsTaxIncluded ? operaInvoiceBody.GrossAccommodation : positiveCharge.GrossAmount);
                 argsElement.AppendChild(priceArgEl);
 
                 XmlElement quantityArgEl = doc.CreateElement(string.Empty, "Arg", string.Empty);
@@ -89,7 +89,7 @@ namespace HttpRequestHandler.Tremol
                 quantityArgEl.SetAttribute("Value", positiveCharge.Quantity);
                 argsElement.AppendChild(quantityArgEl);
 
-                if (positiveCharge.isTaxIncuded)
+                if (positiveCharge.IsTaxIncluded)
                 {
                     XmlElement isTaxCommand = doc.CreateElement(string.Empty, "Command", string.Empty);
                     isTaxCommand.SetAttribute("Name", "SellPLUwithSpecifiedVAT");
@@ -120,39 +120,10 @@ namespace HttpRequestHandler.Tremol
                 }
             }
 
-            XmlDocument xmldoc = new XmlDocument();
-            xmldoc.Load(args[0]);
+            OperaInvoicePayment operaInvoicePayment = new OperaInvoicePayment();
+            operaInvoicePayment.ReadOperaXmlPayments(args);
 
-            decimal cardGrouped = 0;
-            decimal cashGrouped = 0;
-            bool hasCash = false;
-            bool hasCardPayment = false;
-            bool hasCheck = false;
-            bool hasVirament = false;
-
-            XmlNodeList paymentNodes = xmldoc.SelectNodes("folio/body/payment");
-
-            foreach (XmlNode item in paymentNodes)
-            {
-                if (item["FISCALTRXCODETYPE"].InnerText == "A")
-                {
-                    hasCardPayment = true;
-                    cardGrouped += decimal.Parse(item["POSTEDAMOUNT"].InnerText);
-                }
-                else if (item["FISCALTRXCODETYPE"].InnerText == "C")
-                {
-                    hasCash = true;
-                    cashGrouped += decimal.Parse(item["POSTEDAMOUNT"].InnerText);
-                }
-                else if (item["FISCALTRXCODETYPE"].InnerText == "E")
-                    hasCheck = true;
-                else if (item["FISCALTRXCODETYPE"].InnerText == "X")
-                    hasVirament = true;
-                else
-                    item["FISCALTRXCODETYPE"].InnerText = "C";
-            }
-
-            if (hasCardPayment)
+            if (operaInvoicePayment.hasCardPayment)
             {
                 XmlElement cardPaymentCommand = doc.CreateElement(string.Empty, "Command", string.Empty);
                 cardPaymentCommand.SetAttribute("Name", "Payment");
@@ -168,11 +139,11 @@ namespace HttpRequestHandler.Tremol
 
                 XmlElement amountCardArg = doc.CreateElement(string.Empty, "Arg", string.Empty);
                 amountCardArg.SetAttribute("Name", "Amount");
-                amountCardArg.SetAttribute("Value", cardGrouped.ToString());
+                amountCardArg.SetAttribute("Value", operaInvoicePayment.cardGrouped.ToString());
                 cardPaymentArgs.AppendChild(amountCardArg);
             }          
 
-            if(hasCash)
+            if(operaInvoicePayment.hasCash)
             {
                 XmlElement paymentCashCommand = doc.CreateElement(string.Empty, "Command", string.Empty);
                 paymentCashCommand.SetAttribute("Name", "Payment");
@@ -188,7 +159,7 @@ namespace HttpRequestHandler.Tremol
 
                 XmlElement amountCashArg = doc.CreateElement(string.Empty, "Arg", string.Empty);
                 amountCashArg.SetAttribute("Name", "Amount");
-                amountCashArg.SetAttribute("Value", cashGrouped.ToString());
+                amountCashArg.SetAttribute("Value", operaInvoicePayment.cashGrouped.ToString());
                 paymentCashArgs.AppendChild(amountCashArg);
             }
 

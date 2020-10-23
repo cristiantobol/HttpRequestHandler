@@ -16,72 +16,75 @@ namespace HttpRequestHandler.Opera
     {
         public string GrossAccommodation = "";
         public string CityTaxPrice = "";
-        public List<PositiveCharge> ReadXML(string[] args)
+        public List<Charge> ReadOperaXmlCharges(string[] args)
         {
-            //String URLString = "http://localhost:81/xml/fp_buhhanota11324.xml";
             String URLString = args[0];
             var configIni = new IniFile("config.ini");
             string accommodation = configIni.Read("ACCOMMODATION");
 
-            List<PositiveCharge> positiveChargeList = new List<PositiveCharge>();
+            List<Charge> chargeList = new List<Charge>();
             XmlDocument xmldoc = new XmlDocument();
             xmldoc.Load(URLString);
 
-            PositiveCharge positiveCharge;
+            Charge charge;
             XmlNodeList positiveChargeNodes = xmldoc.SelectNodes("folio/body/positive_charge");
             XmlNodeList negativeChargeNodes = xmldoc.SelectNodes("folio/body/negative_charge");
 
-            var concatList = positiveChargeNodes.Cast<XmlNode>().Concat<XmlNode>(negativeChargeNodes.Cast<XmlNode>());
+            var concatList = positiveChargeNodes.Cast<XmlNode>().Concat(negativeChargeNodes.Cast<XmlNode>());
 
             foreach (XmlNode node in concatList)
             {
-                positiveCharge = new PositiveCharge();
-                positiveCharge.Code = node["CODE"].InnerText;
-                positiveCharge.Description = node["DESCRIPTION"].InnerText;
-                positiveCharge.Quantity = node["QUANTITY"].InnerText;
-                positiveCharge.FiscalTrxCodeType = node["FISCALTRXCODETYPE"].InnerText;
-                positiveCharge.Type = node["TYPE"].InnerText;
-                positiveCharge.TotalInclTaxAmount = node["TOTALINCLTAXAMOUNT"].InnerText;
-                positiveCharge.Tax6Amount = node["TAX6AMOUNT"].InnerText;
-                positiveCharge.CodeType = node["CODETYPE"].InnerText;
-                positiveCharge.TaxCodeNo = node["TAX_CODE_NO"].InnerText;
-                positiveCharge.GrossAmount = node["GROSSAMOUNT"].InnerText;
-
-                positiveCharge.isTaxIncuded = false;
-
-                if((positiveCharge.TaxCodeNo == "02,06" || positiveCharge.TaxCodeNo == "02,05") && positiveCharge.TotalInclTaxAmount != "")
+                charge = new Charge
                 {
-                    positiveCharge.FiscalTrxCodeType = "B";
-                    positiveCharge.isTaxIncuded = true;
-                    GrossAccommodation = (decimal.Parse(positiveCharge.GrossAmount) - decimal.Parse(positiveCharge.Tax6Amount)).ToString();
-                    CityTaxPrice = (decimal.Parse(positiveCharge.Tax6Amount)).ToString();
+                    Description = node["DESCRIPTION"].InnerText,
+                    Quantity = node["QUANTITY"].InnerText,
+                    FiscalTrxCodeType = node["FISCALTRXCODETYPE"].InnerText,
+                    TotalInclTaxAmount = node["TOTALINCLTAXAMOUNT"].InnerText,
+                    Tax6Amount = node["TAX6AMOUNT"].InnerText,
+                    CodeType = node["CODETYPE"].InnerText,
+                    TaxCodeNo = node["TAX_CODE_NO"].InnerText,
+                    GrossAmount = node["GROSSAMOUNT"].InnerText,
+
+                    IsTaxIncluded = false
+                };
+
+                if ((charge.TaxCodeNo == "02,06" || charge.TaxCodeNo == "02,05") && charge.TotalInclTaxAmount != "")
+                {
+                    charge.FiscalTrxCodeType = "B";
+                    charge.IsTaxIncluded = true;
+                    GrossAccommodation = (decimal.Parse(charge.GrossAmount) - decimal.Parse(charge.Tax6Amount)).ToString();
+                    CityTaxPrice = (decimal.Parse(charge.Tax6Amount)).ToString();
                 }
 
-                if(positiveCharge.TotalInclTaxAmount == "" || positiveCharge.TotalInclTaxAmount == "0.00")
+                if(charge.TotalInclTaxAmount == "" || charge.TotalInclTaxAmount == "0.00")
                 {
-                    if(positiveCharge.FiscalTrxCodeType == "_")
+                    if(charge.FiscalTrxCodeType == "_")
                     {
-                        positiveCharge.FiscalTrxCodeType = "E";
+                        charge.FiscalTrxCodeType = "E";
                     }
                     else
                     {
-                        positiveCharge.FiscalTrxCodeType = "B";
+                        charge.FiscalTrxCodeType = "B";
                     }             
                 }
 
-                if(positiveCharge.Description == "VAT B")
+                if(charge.Description == "VAT B")
                 {
-                    positiveCharge.Quantity = "1";
+                    charge.Quantity = "1";
                 }
 
-                if (positiveCharge.FiscalTrxCodeType == "_")
+                if (charge.FiscalTrxCodeType == "_")
                 {
-                    positiveCharge.FiscalTrxCodeType = "E";
+                    charge.FiscalTrxCodeType = "E";
+                }
+                else if (charge.FiscalTrxCodeType == "" || charge.FiscalTrxCodeType == null)
+                {
+                    charge.FiscalTrxCodeType = "A";
                 }
                 
-                positiveChargeList.Add(positiveCharge);
+                chargeList.Add(charge);
             }
-            return positiveChargeList;
+            return chargeList;
         }
     }
 }
