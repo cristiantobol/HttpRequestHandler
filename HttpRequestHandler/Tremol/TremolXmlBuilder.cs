@@ -81,12 +81,12 @@ namespace HttpRequestHandler.Tremol
 
                 XmlElement priceArgEl = doc.CreateElement(string.Empty, "Arg", string.Empty);
                 priceArgEl.SetAttribute("Name", "Price");
-                priceArgEl.SetAttribute("Value", positiveCharge.IsTaxIncluded ? operaInvoiceBody.GrossAccommodation : positiveCharge.GrossAmount);
+                priceArgEl.SetAttribute("Value", positiveCharge.IsTaxIncluded ? operaInvoiceBody.GrossAccommodation.Replace(",", "") : positiveCharge.GrossAmount.Replace(",", ""));
                 argsElement.AppendChild(priceArgEl);
 
                 XmlElement quantityArgEl = doc.CreateElement(string.Empty, "Arg", string.Empty);
                 quantityArgEl.SetAttribute("Name", "Quantity");
-                quantityArgEl.SetAttribute("Value", positiveCharge.Quantity);
+                quantityArgEl.SetAttribute("Value", positiveCharge.Quantity.Replace(",", ""));
                 argsElement.AppendChild(quantityArgEl);
 
                 if (positiveCharge.IsTaxIncluded)
@@ -110,12 +110,12 @@ namespace HttpRequestHandler.Tremol
 
                     XmlElement isTaxPriceArg = doc.CreateElement(string.Empty, "Arg", string.Empty);
                     isTaxPriceArg.SetAttribute("Name", "Price");
-                    isTaxPriceArg.SetAttribute("Value", operaInvoiceBody.CityTaxPrice);
+                    isTaxPriceArg.SetAttribute("Value", operaInvoiceBody.CityTaxPrice.Replace(",", ""));
                     isTaxArgs.AppendChild(isTaxPriceArg);
 
                     XmlElement isTaxQuantityArg = doc.CreateElement(string.Empty, "Arg", string.Empty);
                     isTaxQuantityArg.SetAttribute("Name", "Quantity");
-                    isTaxQuantityArg.SetAttribute("Value", positiveCharge.Quantity);
+                    isTaxQuantityArg.SetAttribute("Value", positiveCharge.Quantity.Replace(",", ""));
                     isTaxArgs.AppendChild(isTaxQuantityArg);
                 }
             }
